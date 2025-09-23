@@ -1,3 +1,4 @@
+import json
 import os
 import base64
 from fastapi import FastAPI, Form, HTTPException, Header
@@ -11,12 +12,16 @@ from firebase_admin import auth, credentials
 # changes
 
 port = int(os.environ.get("PORT", 8000))  # 8000 for local, $PORT on Render
+service_account_path = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+if not service_account_path:
+    raise ValueError("FIREBASE_SERVICE_ACCOUNT environment variable is not set!")
 
-# ----------------- Initialize Firebase Admin -----------------
-cred = credentials.Certificate(
-    "/Users/rathodyashpalsingh/Desktop/Farm2Home-Api/Config/serviceAccountKey.json"
-)
-firebase_admin.initialize_app(cred)
+# Read and parse the JSON file
+with open(service_account_path, 'r') as f:
+    service_account_info = json.load(f)
+
+# Create credentials
+cred = credentials.Certificate(service_account_info)
 
 # ----------------- Initialize FastAPI & MongoDB -----------------
 app = FastAPI()
