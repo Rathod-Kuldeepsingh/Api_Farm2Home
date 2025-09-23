@@ -75,7 +75,7 @@ def save_base64_image(image_base64: str, name: str) -> str:
             raise HTTPException(status_code=400, detail="Image size must be < 5MB")
 
         file_id = fs.put(image_data, filename=f"{name}.png", content_type="image/png")
-        return f"http://127.0.0.1:8000/images/{file_id}"
+        return f"https://api-farm2home.onrender.com/images/{file_id}"
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid Base64 image")
 
