@@ -8,20 +8,20 @@ import gridfs
 from bson import ObjectId
 from pydantic import BaseModel
 import firebase_admin
-from firebase_admin import auth, credentials
+from firebase_admin import auth, credentials, initialize_app
 # changes
 
 port = int(os.environ.get("PORT", 8000))  # 8000 for local, $PORT on Render
-service_account_path = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-if not service_account_path:
-    raise ValueError("FIREBASE_SERVICE_ACCOUNT environment variable is not set!")
+service_account_path = os.getenv("FIREBASE_SERVICE_ACCOUNT", "/etc/secrets/serviceAccountKey.json")
 
-# Read and parse the JSON file
-with open(service_account_path, 'r') as f:
-    service_account_info = json.load(f)
+if not os.path.exists(service_account_path):
+    raise ValueError(f"Firebase service account file not found at: {service_account_path}")
 
 # Create credentials
-cred = credentials.Certificate(service_account_info)
+cred = credentials.Certificate(service_account_path)
+
+# Initialize Firebase
+initialize_app(cred)
 
 # ----------------- Initialize FastAPI & MongoDB -----------------
 app = FastAPI()
