@@ -14,7 +14,7 @@ port = int(os.environ.get("PORT", 8000))  # 8000 for local, $PORT on Render
 
 # ----------------- Initialize Firebase Admin -----------------
 cred = credentials.Certificate(
-    "/Users/rathodyashpalsingh/Desktop/Farm2Home-Api/Config/serviceAccountKey.json"
+    "/Users/rathodyashpalsingh/Desktop/Farm2Home-Api/Api_Farm2Home/Config/serviceAccountKey.json"
 )
 firebase_admin.initialize_app(cred)
 
