@@ -51,6 +51,18 @@ def serialize_product(product) -> dict:
         "image_url": product.get("image_url"),
     }
 
+def serialize_public_product(product) -> dict:
+    """Public product info for marketplace (no farmer_id)"""
+    return {
+        "id": str(product["_id"]),
+        "farmer_name": product.get("farmer_name"),
+        "name": product["name"],
+        "price": product["price"],
+        "quantity": product["quantity"],
+        "description": product.get("description"),
+        "image_url": product.get("image_url"),
+    }
+
 # ----------------- Helper Functions -----------------
 def get_firebase_uid(id_token: str) -> str:
     try:
@@ -75,7 +87,7 @@ def save_base64_image(image_base64: str, name: str) -> str:
 
 # ----------------- API Endpoints -----------------
 
-# 1️⃣ Add Product
+# 1️⃣ Add Product (Owner-only)
 @app.post("/products")
 async def add_product(
     id_token: str = Form(...),
@@ -106,7 +118,7 @@ async def add_product(
     except Exception:
         raise HTTPException(status_code=500, detail="Failed to save product")
 
-# 2️⃣ Get All Products of Logged-in Farmer
+# 2️⃣ Get All Products of Logged-in Farmer (Owner-only)
 @app.get("/my-products")
 def get_my_products(id_token: str = Header(...)):
     farmer_id = get_firebase_uid(id_token)
@@ -172,7 +184,17 @@ async def delete_product(product_id: str, id_token: str = Form(...)):
     Product_collection.delete_one({"_id": ObjectId(product_id)})
     return {"message": "✅ Product deleted successfully"}
 
-# 6️⃣ Serve Images
+# 6️⃣ Public Marketplace: Fetch All Products
+@app.get("/all-products")
+def get_all_products(skip: int = 0, limit: int = 50):
+    """
+    Fetch all products from all farmers for public marketplace
+    Supports pagination via skip & limit
+    """
+    products = list(Product_collection.find().skip(skip).limit(limit))
+    return [serialize_public_product(p) for p in products]
+
+# 7️⃣ Serve Images
 @app.get("/images/{file_id}")
 async def get_image(file_id: str):
     try:
